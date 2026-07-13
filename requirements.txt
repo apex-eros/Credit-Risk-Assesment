@@ -1,0 +1,12 @@
+FastAPI
+Uvicorn
+Pandas
+NumPy
+Scikit-learn
+XGBoost
+SHAP
+Matplotlib
+Joblib
+Streamlit
+Requests
+Pydantic
