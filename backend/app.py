@@ -1,11 +1,13 @@
 import joblib
 from fastapi import FastAPI
-from pydantic import BaseModel
 from fastapi.staticfiles import StaticFiles
 import pandas as pd
 import numpy as np
 from backend.shap_utils import generate_waterfall
 from pathlib import Path
+from config.mapping import sex_map,saving_map,checking_map,purpose_map
+from schema.user_input import CustomerData
+from models.prediction import prediction
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -20,42 +22,13 @@ app.mount(
     name="assets"
 )
 
-sex_map = {
-    0: "Female",
-    1: "Male"
-}
-
-saving_map = {
-    0: "Little",
-    1: "Moderate",
-    2: "Quite Rich",
-    3: "Rich"
-}
-
-checking_map = {
-    0: "Little",
-    1: "Moderate",
-    2: "Rich"
-}
-
-class CustomerData(BaseModel):
-    Age: int
-    Sex: int
-    Job: int
-    Saving_accounts: int
-    Checking_account: int
-    Credit_amount: float
-    Duration: int
-    Housing_own: int
-    Housing_rent: int
-
 @app.get('/')
 def home():
     return {"message": "Credit Risk Prediction API Running"}
 
 @app.post('/predict')
 def predict(data: CustomerData):
-    input_df = pd.DataFrame([{
+    input_df = {
          "Age": data.Age,
         "Sex": data.Sex,
         "Job": data.Job,
@@ -64,48 +37,21 @@ def predict(data: CustomerData):
         "Credit amount": data.Credit_amount,
         "Duration": data.Duration,
         "Housing_own": data.Housing_own,
-        "Housing_rent": data.Housing_rent
-    }])
+        "Housing_rent": data.Housing_rent,
+        "Purpose" : data.Purpose
+    }
 
-    prediction = model.predict(input_df)[0]
-    probability = model.predict_proba(input_df)[0][1]
-    prediction_label = (
-    "Good Customer"
-    if prediction == 1
-    else "Bad Customer"
-)
-
-    if probability >= 0.7:
-        risk_label = "Low Risk"
-    elif probability >= 0.4:
-        risk_label = "Medium Risk"
-    else:
-        risk_label = "High Risk"
-
-    credit_score = int(300 + probability * 600)
-
-    if credit_score >= 750:
-        grade = "A"
-    elif credit_score >= 650:
-        grade = "B"
-    elif credit_score >= 550:
-        grade = "C"
-    else:
-        grade = "D"
-
+    result = prediction(model, input_df)
+    
     return {
-    "customer_details": {
+        "customer_details": {
         "age": data.Age,
         "sex": sex_map[data.Sex],
         "saving_account": saving_map[data.Saving_accounts],
-        "checking_account": checking_map[data.Checking_account]
+        "checking_account": checking_map[data.Checking_account],
+        "purpose" : purpose_map[data.Purpose]
     },
-    "prediction": prediction_label,
-    "probability_good_customer": round(float(probability), 4),
-    "risk_category": risk_label,
-    "credit_score": credit_score,
-    "risk_grade": grade
-    
+    **result
 }
 
 
@@ -121,7 +67,8 @@ def explain(data: CustomerData):
         "Credit amount": data.Credit_amount,
         "Duration": data.Duration,
         "Housing_own": data.Housing_own,
-        "Housing_rent": data.Housing_rent
+        "Housing_rent": data.Housing_rent,
+        "Purpose" : data.Purpose
     }])
 
     generate_waterfall(customer_df)
