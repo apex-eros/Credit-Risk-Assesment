@@ -289,7 +289,8 @@ Request:
   "Credit_amount":15000,
   "Duration":40,
   "Housing_own":0,
-  "Housing_rent":1
+  "Housing_rent":1,
+  "Purpose" : 4
 }
 ```
 
