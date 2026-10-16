@@ -95,6 +95,7 @@ The model uses the following customer attributes:
 | Duration         | Loan Duration           |
 | Housing Own      | Own House               |
 | Housing Rent     | Rental House            |
+| Purpose          | Purpose of Loan         |
 
 ---
 
@@ -162,7 +163,7 @@ Logged Metrics:
 * Precision
 * Recall
 * F1 Score
-* ROC AUC
+* PR AUC
 
 ---
 
@@ -176,70 +177,33 @@ XGBoost Classifier
 
 Reason:
 
-* Highest ROC-AUC
+* Highest PR-AUC
 * Strong Generalization
 * Better Recall
 * Better Separation Between Good and Bad Customers
 
 ---
 
-# Model Evaluation Metrics
 
-## ROC-AUC
+## Model Evaluation Metrics
 
-Measures model's ability to distinguish:
+### ROC-AUC
 
-```text
-Good Customers
-vs
-Bad Customers
-```
+Measures the model's ability to distinguish between the two classes across different classification thresholds.
 
-Range:
+### PR-AUC
 
-```text
-0.5 = Random Guess
-1.0 = Perfect Model
-```
+Summarizes the precision-recall trade-off across different classification thresholds. It is especially useful when evaluating performance on imbalanced datasets.
 
----
+### KS Statistic
 
-## KS Statistic
+Measures the maximum separation between the cumulative distributions of the two classes.
 
-Measures separation between:
+### Gini Coefficient
 
-```text
-Good Customers
-vs
-Bad Customers
-```
+Derived from ROC-AUC:
 
-Formula:
-
-```text
-KS = Max(TPR - FPR)
-```
-
-Interpretation:
-
-| KS Score | Quality   |
-| -------- | --------- |
-| <20      | Weak      |
-| 20-40    | Good      |
-| 40-60    | Very Good |
-| >60      | Excellent |
-
----
-
-## Gini Coefficient
-
-Derived from ROC-AUC.
-
-Formula:
-
-```text
-Gini = 2 × AUC − 1
-```
+Gini = 2 × ROC-AUC − 1
 
 Interpretation:
 
